@@ -457,6 +457,86 @@ chmod +x collect-logs.sh
 
 Now you always have fresh logs in `access.log` file!
 
+Now you always have fresh logs in `access.log` file!
+
+
+## greping
+
+``` bash
+# 1. All POST requests to /login that failed
+grep -E "POST /login.*\" (401|403)" access.log
+
+# 2. All requests from IPs starting with 203
+grep -E "^203\." access.log
+
+# 3. All 404 errors in the last hour (hour 15)
+grep -E "\[.*/.*/.* 15:.*\].*\" 404" access.log
+
+# 4. All requests to admin panel
+grep -E "/admin" access.log
+
+# 5. All suspicious SQL patterns
+grep -iE "select.*from|union.*select" access.log
+```
+
+## common grep patterns
+
+```bash
+# Basic Search
+grep "pattern" file                    # Find pattern
+grep -i "pattern" file                 # Case insensitive
+grep -v "pattern" file                 # Invert (exclude)
+grep -c "pattern" file                 # Count matches
+grep -n "pattern" file                 # Show line numbers
+
+# Context
+grep -A 3 "pattern" file               # 3 lines after
+grep -B 3 "pattern" file               # 3 lines before
+grep -C 3 "pattern" file               # 3 lines both sides
+
+# Regex
+grep -E "pat1|pat2" file               # OR logic
+grep -E "^pattern" file                # Start of line
+grep -E "pattern$" file                # End of line
+grep -E "[0-9]{3}" file                # Exactly 3 digits
+grep -E "pat.*tern" file               # Any chars between
+
+# Common Patterns
+grep -E " [45][0-9]{2} " file          # All errors (4xx, 5xx)
+grep -E "^[0-9.]+\." file              # IP addresses
+grep -E "\?.*=" file                   # URLs with parameters
+grep -iE "bot|crawler" file            # Bots/crawlers
+```
+
+## some regex patterns
+
+``` bash
+# Extract all status codes
+grep -oE " [0-9]{3} " access.log
+# Explanation: Extracts only 3-digit numbers (status codes)
+```
+
+---
+
+## Part 2: Regex Patterns for Log Analysis
+
+### Understanding Regex Special Characters
+```
+.   = Any single character
+*   = Zero or more of previous
++   = One or more of previous
+?   = Zero or one of previous
+^   = Start of line
+$   = End of line
+[]  = Character class
+|   = OR
+()  = Grouping
+{}  = Exact count
+\   = Escape special character
+```
+---
+
+
 ---
 
 ## Cleanup
