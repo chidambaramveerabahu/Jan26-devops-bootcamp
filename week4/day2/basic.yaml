@@ -1,0 +1,25 @@
+# list fruites: [apples, oranges, grapes], my_skills: [aws, terraform, kubernetes]
+# name: John Doe , age: 30, city: New York
+
+AWS_bootcamp:
+  duration: 20 weeks
+  teachers: Akhilesh
+  topics:
+    - Cloud Computing
+    - AWS Services
+    - Terraform
+    - Kubernetes
+    - DevOps Practices
+  projects:
+    - project1: "Deploy a web application on AWS using Terraform and Kubernetes"
+    - project2: "Implement CI/CD pipeline for a microservices application using AWS services"
+  
+  students:
+    - name: Akhilesh
+      age: 28
+      city: San Francisco
+      skills: [Python, Docker, AWS]
+    - name: Bob
+      age: 32
+      city: Seattle
+      skills: [Java, Terraform, Kubernetes]

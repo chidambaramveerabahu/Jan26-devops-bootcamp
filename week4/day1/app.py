@@ -281,10 +281,11 @@ TEMPLATE = """
 </head>
 <body>
 
+
 <!-- Nav -->
 <nav>
     <ul>
-        <li><a href="#about">About</a></li>
+        <li><a href="#about Akhilesh">About</a></li>
         <li><a href="#skills">Skills</a></li>
         <li><a href="#projects">Projects</a></li>
         <li><a href="#writing">Writing</a></li>
@@ -511,6 +512,11 @@ TEMPLATE = """
 <footer>
     <p>&copy; 2026 Akhilesh Mishra &middot; <a href="https://livingdevops.com">livingdevops.com</a> &middot; Built with Flask &amp; Python</p>
 </footer>
+
+
+
+
+
 
 </body>
 </html>
