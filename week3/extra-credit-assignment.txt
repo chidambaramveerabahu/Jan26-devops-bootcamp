@@ -1,0 +1,19 @@
+1. ## Learn about below topics
+
+   ALB VS NLB with usecase
+
+   Private vs public ALB
+
+   Difference RDS configureation
+
+   Cloud watch Logging
+
+
+2. ## Assignment
+   setup one ec2 image(provate or public), install git, setup init scripts(that runs when ec2 vm starts ) that will clone the code and run the run.sh script to start the app.
+   now create an AMI from the instace, use that to create launch template and no userdata needed as that part is baked in init script
+   of ec2. 
+
+   document why this is cleaner approach.
+
+   document the options to collect the logs for the app, best practices.
