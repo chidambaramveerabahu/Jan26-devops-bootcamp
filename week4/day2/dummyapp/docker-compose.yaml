@@ -26,7 +26,7 @@ services:
       DB_USER: myuser
       DB_PASSWORD: mypassword
       DB_NAME: mydb
-      DB_HOST: localhost
+      DB_HOST: db
     networks:
       - week4day2
     depends_on:
