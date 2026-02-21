@@ -1,0 +1,18 @@
+[cvmahesh@localhost day1]$ docker push docker.io/chidambaramv1/jan26:week4
+Emulate Docker CLI using podman. Create /etc/containers/nodocker to quiet msg.
+Error: docker.io/chidambaramv1/jan26:week4: image not known
+[cvmahesh@localhost day1]$ docker tag chidambaramv1/jan26:week4 docker.io/chidambaramv1/jan26:week4
+docker push docker.io/chidambaramv1/jan26:week4
+Emulate Docker CLI using podman. Create /etc/containers/nodocker to quiet msg.
+Emulate Docker CLI using podman. Create /etc/containers/nodocker to quiet msg.
+Getting image source signatures
+Copying blob 128c71264009 skipped: already exists  
+Copying blob d8871274053b skipped: already exists  
+Copying blob 4f69a3eb488f skipped: already exists  
+Copying blob b5e2021c4c8b skipped: already exists  
+Copying blob 954d6059ca7b skipped: already exists  
+Copying blob ef235bf1a09a skipped: already exists  
+Copying blob d5f1aed5ccfc done   | 
+Copying blob 504b763a14ef done   | 
+Copying blob c59471c320a2 skipped: already exists  
+Copying config 4ccd99a394 done   | 
