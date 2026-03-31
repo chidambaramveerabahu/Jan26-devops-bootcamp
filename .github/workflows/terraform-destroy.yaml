@@ -1,0 +1,39 @@
+name: week6 ecs terraform destroy
+
+on:
+  workflow_dispatch:
+
+env:
+  AWS_REGION: ap-south-1
+  Terraform_Version: 1.12.1
+  infra_path: week6/infra/
+
+jobs:
+  terraform-apply:
+    runs-on: ubuntu-latest
+    environment: prod
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: ${{ env.Terraform_Version }}
+
+      - name: Terraform Init
+        working-directory: ${{ env.infra_path }}
+        run: terraform init
+
+      - name: Terraform destroy
+        working-directory: ${{ env.infra_path }}
+        run: terraform destroy -auto-approve
+  

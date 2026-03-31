@@ -1,0 +1,80 @@
+name: ECS build and push to ECR
+
+on:
+  workflow_dispatch:
+
+
+env:
+  AWS_REGION: ap-south-1
+  # << --------- ECR_REGISTRY ------------------>/<--- ECR_REPOSITORY ----->:
+  # 879381241087.dkr.ecr.ap-south-1.amazonaws.com/jan26-bootcamp-student-portal
+  ECR_REGISTRY: 879381241087.dkr.ecr.ap-south-1.amazonaws.com
+  ECR_REPOSITORY: jan26-bootcamp-student-portal
+  IMAGE_TAG: ${{ github.sha }} # $GITHUB_SHA
+  app_path: week6/app/
+
+
+jobs:  
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, tag, and push image to Amazon ECR
+        working-directory: ${{ env.app_path }}
+        run: |
+          # Build the Docker image
+          # docker build -t 879381241087.dkr.ecr.ap-south-1.amazonaws.com/jan26-bootcamp-student-portal:042d3aa84e55dd8c0d089b9c70e54b779f57f30c .
+          docker build -t ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }} .
+
+          # Push the image to Amazon ECR
+          # docker push 879381241087.dkr.ecr.ap-south-1.amazonaws.com/jan26-bootcamp-student-portal:042d3aa84e55dd8c0d089b9c70e54b779f57f30c
+          docker push ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
+
+  ecs-deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    environment: dev
+    env:
+      ecs_cluster: jan26-bootcamp-student-portal
+      ecs_service: jan26-bootcamp-student-portal-service 
+      ecs_task_definition: jan26-bootcamp-student-portal-task
+      new_image: 879381241087.dkr.ecr.ap-south-1.amazonaws.com/jan26-bootcamp-student-portal:${{ github.sha }}
+
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Download task definition
+        run: aws ecs describe-task-definition --task-definition ${{ env.ecs_task_definition }} --query taskDefinition > task-definition.json
+
+      - name: Update task definition with new image
+        run: |
+          jq --arg IMAGE "${{ env.new_image }}" '.containerDefinitions[0].image = $IMAGE' task-definition.json > updated-task-definition.json
+          mv updated-task-definition.json task-definition.json
+          cat task-definition.json
+
+      - name: Deploy to Amazon ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: task-definition.json
+          service: ${{ env.ecs_service }}
+          cluster: ${{ env.ecs_cluster }}
+          wait-for-service-stability: false

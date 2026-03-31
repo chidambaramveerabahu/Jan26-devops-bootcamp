@@ -1,0 +1,52 @@
+Batch: Jan 2026 batch
+
+Teacher: Akhilesh
+students:
+  - Abhilash:
+      experience: 2 years in software development
+      skills:
+        - Python
+        - Django
+        - SQL
+
+  - Atul:
+      experience: 1 year in web development
+      skills:
+        - JavaScript
+        - React
+
+  - Ankita:
+      experience: 3 years in data analysis
+      skills: 
+       - Python
+       - Pandas
+       - NumPy
+
+Total_classes: 60
+
+Topics:
+  - Introduction to Programming
+  - Data Structures and Algorithms
+  - Web Development
+  - Database Management
+  - Software Development Best Practices
+
+
+
+Classes:
+  - Class 1: Introduction to Programming
+    topics:
+      - Basics of programming
+      - Variables and data types
+      - Control structures
+      - Functions and modules
+    projects:
+      - Project 1: Build a simple calculator
+      - Project 2: Create a to-do list application
+
+
+  - Class 2: Data Structures and Algorithms
+
+
+  - Class 3: Web Development
+  - Class 4: Database

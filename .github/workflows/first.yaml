@@ -1,0 +1,39 @@
+name: first workflow
+
+on:
+  # manually trigger the workflow
+  workflow_dispatch:
+
+
+
+jobs:  
+  first_job:
+    runs-on: ubuntu-latest
+    # runs-on: ubuntu-latest
+    # runs-on: windows-latest
+    # runs-on: macos-latest
+# Indentation is important in YAML files. Make sure to use consistent indentation (usually 2 spaces) for nested elements.
+    steps:
+      - name: single shell command
+        run: echo "Hello World"
+
+      - name: multiple shell commands
+        run: |       
+          echo "Hello World"
+          echo "Welcome to GitHub Actions"
+          echo "This is a multi-line command"
+          sleep 10
+
+  second_job:
+    needs: first_job
+    runs-on: windows-latest
+    steps:
+      - name: Run Windows command
+        run: echo "Hello from Windows"
+
+      - name: Multiple Windows commands
+        run: |
+          echo "Hello World"
+          echo "Welcome to GitHub Actions on Windows"
+          dir
+          Get-ChildItem
