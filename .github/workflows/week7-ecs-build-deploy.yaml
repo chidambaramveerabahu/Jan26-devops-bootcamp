@@ -5,7 +5,7 @@ on:
 
 env:
   AWS_REGION: ap-south-1
-  ECR_REGISTRY: 879381241087.dkr.ecr.ap-south-1.amazonaws.com
+  ECR_REGISTRY: 379047602287.dkr.ecr.ap-south-1.amazonaws.com
   ECR_REPOSITORY: jan26-bootcamp-student-portal
   IMAGE_TAG: ${{ github.sha }}
   app_path: week6/app/
@@ -52,7 +52,7 @@ jobs:
 
       - name: Push the image to Amazon ECR
         run: |
-          aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 879381241087.dkr.ecr.ap-south-1.amazonaws.com
+          aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 379047602287.dkr.ecr.ap-south-1.amazonaws.com
           docker push ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
 
   ecs-deploy:
@@ -63,7 +63,7 @@ jobs:
       ecs_cluster: jan26-bootcamp-student-portal
       ecs_service: jan26-bootcamp-student-portal-service 
       ecs_task_definition: jan26-bootcamp-student-portal-task
-      new_image: 879381241087.dkr.ecr.ap-south-1.amazonaws.com/jan26-bootcamp-student-portal:${{ github.sha }}
+      new_image: 379047602287.dkr.ecr.ap-south-1.amazonaws.com/jan26-bootcamp-student-portal:${{ github.sha }}
 
     steps:
       - name: Configure AWS Credentials
