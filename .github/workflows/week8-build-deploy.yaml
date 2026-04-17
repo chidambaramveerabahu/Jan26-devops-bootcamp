@@ -1,0 +1,134 @@
+name: week8-build-deploy
+
+on:
+  workflow_dispatch:
+  # push:
+  #   branches:
+  #     - main
+    
+env:
+  aws_region: ap-south-1
+  registry: "879381241087.dkr.ecr.ap-south-1.amazonaws.com"
+  tag: ${{ github.sha }}
+
+  # registry/repository:tag
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        service:
+          - name: frontend
+            ecr_repo: "devopsdozo-frontend"
+            path: ./DevOpsDojo/frontend/
+
+          - name: backend
+            ecr_repo: "devopsdozo-backend"
+            path: ./DevOpsDojo/backend/
+  
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v5.1.1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.aws_region }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        run: |
+          aws ecr get-login-password --region ${{ env.aws_region }} | docker login --username AWS --password-stdin ${{ env.registry }}
+
+      - name: Build
+        run: docker build -t ${{ env.registry }}/${{ matrix.service.ecr_repo }}:${{ env.tag }} ${{ matrix.service.path }}
+
+
+      - name: Tag and push image to Amazon ECR
+        run: |
+          docker push ${{ env.registry }}/${{ matrix.service.ecr_repo }}:${{ env.tag }}
+
+  migration:
+    needs: build
+    runs-on: ubuntu-latest
+    env:
+      ECS_CLUSTER: jan26-bootcamp-devopsdozo-cluster
+      ECS_TASK_DEFINITION: jan26-bootcamp-devopsdozo-backend-task
+      ecs_security_group: sg-05f2e60fbbe8bc14e
+      ecs_subnet: subnet-053f9acff255a9284
+
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v5.1.1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.aws_region }}
+
+      - name: Run database migration via ECS task
+        run: |
+          aws ecs run-task --cluster ${{ env.ECS_CLUSTER }} \
+          --launch-type FARGATE \
+          --task-definition ${{ env.ECS_TASK_DEFINITION }} \
+          --network-configuration "awsvpcConfiguration={subnets=[${{ env.ecs_subnet }}],securityGroups=[${{ env.ecs_security_group }}],assignPublicIp=ENABLED}" \
+          --overrides '{"containerOverrides":[{"name":"devopsdozo-backend","command":["/bin/sh","migrate.sh"]}]}'
+
+  deploy:
+    needs: [  build, migration]
+    runs-on: ubuntu-latest
+    env:
+      ECS_CLUSTER: jan26-bootcamp-devopsdozo-cluster
+
+    strategy:
+      fail-fast: false
+      matrix:
+        service:
+          - name: frontend
+            ecr_repo: "devopsdozo-frontend"
+            ECS_APP_CONTAINER_NAME: devopsdozo-frontend
+            ECS_TASK_DEFINITION: jan26-bootcamp-devopsdozo-frontend-task
+            ECS_SERVICE: jan26-bootcamp-devopsdozo-frontend-service
+          - name: backend
+            ecr_repo: "devopsdozo-backend"
+            ECS_APP_CONTAINER_NAME: devopsdozo-backend
+            ECS_TASK_DEFINITION: jan26-bootcamp-devopsdozo-backend-task
+            ECS_SERVICE: jan26-bootcamp-devopsdozo-backend-service
+        
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v5.1.1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.aws_region }}
+
+  
+      - name: Download task definition for web
+        run: |
+          aws ecs describe-task-definition --task-definition ${{ matrix.service.ECS_TASK_DEFINITION }} \
+          --query taskDefinition > task-definition.json
+          ls -l task-definition.json
+
+      - name: Fill in the new image ID for web in the Amazon ECS task definition
+        id: task-def-web
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-definition.json
+          container-name: ${{ matrix.service.ECS_APP_CONTAINER_NAME }}
+          image: ${{ env.registry }}/${{ matrix.service.ecr_repo }}:${{ env.tag }}
+
+      - name: Deploy app on Amazon ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.task-def-web.outputs.task-definition }}
+          service: ${{ matrix.service.ECS_SERVICE }}
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: false
