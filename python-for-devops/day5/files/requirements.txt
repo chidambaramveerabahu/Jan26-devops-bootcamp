@@ -1,0 +1,3 @@
+# Lambda runtime: python3.11 or 3.12
+# boto3 is provided by the Lambda runtime — no need to bundle it
+psycopg2-binary==2.9.9
